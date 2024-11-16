@@ -29,39 +29,37 @@
     - name: Ensure Terraform binary is executable
       file:
         path: /usr/local/bin/terraform
-- name: Ensure the repository is cloned
+    - name: GIT repository is cloned
       git:
         repo: https://github.com/rakesh300pt/Rakesh_Terraform.git
-        dest: /home/azureuser/
+        dest: /home/azureuser/demo
         version: main
         update: yes
-  - name: Ensure Terraform is initialized
-      command: terraform init
+    - name: Initialize Terraform working directory
+      community.general.terraform:
+        project_path: /home/azureuser
+        state: present
+    - name: Plan Terraform changes
+      ansible.builtin.command:
+        cmd: terraform plan -out=tfplan
+        chdir: /home/azureuser
+    - name: Validate Terraform configuration
+      ansible.builtin.command:
+        cmd: terraform validate
       args:
         chdir: /home/azureuser
-      register: init_output
-    - name: Display Terraform init output
-      debug:
-        msg: /home/azureuser/demo
-    - name: Apply Terraform scripts (auto-approve)
-      command: terraform apply -auto-approve
+    - name: Apply Terraform changes
+      ansible.builtin.command:
+        cmd: terraform apply -auto-approve
       args:
-        chdir: /home/azureuser/demo
-      register: apply_output
-    - name: Display Terraform apply output
-      debug:
-        msg: "{{ apply_output.stdout }}"
-    - name: Capture the output to a file (optional)
-      copy:
-        content: "{{ apply_output.stdout }}"
-        dest: /tmp/terraform_apply_output.txt
+        chdir: /home/azureuser
     - name: Remove cloned repositories
       file:
-        path: /home/azureuser/demo  # Replace with the path of the cloned repository
+        path: /home/azureuser/demo
         state: absent
-
     - name: Remove specific created files
       file:
-        path: /home/azureuser/test.tf  # Replace with the path of the file you want to delete
+        path: /home/azureuser/test.tf
         state: absent
+~
 
