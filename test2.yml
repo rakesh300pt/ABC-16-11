@@ -55,40 +55,13 @@
       copy:
         content: "{{ apply_output.stdout }}"
         dest: /tmp/terraform_apply_output.txt
-- name: Remove cloned repositories
+    - name: Remove cloned repositories
       file:
-        path: /path/to/cloned/repo  # Replace with the path of the cloned repository
+        path: /home/azureuser/demo  # Replace with the path of the cloned repository
         state: absent
-      when: ansible_facts['os_family'] == 'Debian' or ansible_facts['os_family'] == 'RedHat'
 
     - name: Remove specific created files
       file:
-        path: /path/to/created/file.txt  # Replace with the path of the file you want to delete
+        path: /home/azureuser/test.tf  # Replace with the path of the file you want to delete
         state: absent
-      when: ansible_facts['os_family'] == 'Debian' or ansible_facts['os_family'] == 'RedHat'
-
-    - name: Remove directories matching a pattern
-      find:
-        paths: /path/to/parent_directory  # Replace with parent directory path
-        patterns: '*pattern*'  # Replace with appropriate wildcard or pattern for matching files/directories
-        recurse: yes
-      register: items_to_remove
-
-    - name: Remove matched items
-      file:
-        path: "{{ item.path }}"
-        state: absent
-      loop: "{{ items_to_remove.files }}"
-
-  - name: Remove cloned Git repository directory
-      file:
-        path: /path/to/cloned/repo  # Replace with the path of the cloned repository
-        state: absent
-      when: ansible_facts['os_family'] in ['Debian', 'RedHat']
-
-    - name: Remove additional cloned directories or files (optional)
-      file:
-        path: /path/to/another/cloned/directory  # Replace with another path to be cleaned
-        state: absent
-      when: ansible_facts['os_family'] in ['Debian', 'RedHat']
 
