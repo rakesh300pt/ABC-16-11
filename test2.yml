@@ -1,0 +1,94 @@
+---
+- name: Install Terraform and Git
+  hosts: all
+  become: yes
+  tasks:
+    - name: Update the package manager
+      apt:
+        update_cache: yes
+    - name: Install Git
+      apt:
+        name: git
+        state: present
+    - name: Ensure the necessary packages are installed (for Ubuntu/Debian systems)
+      apt:
+        name:
+          - unzip
+          - wget
+        state: present
+      become: yes
+    - name: Download Terraform
+      get_url:
+        url: https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_linux_amd64.zip
+        dest: /tmp/terraform.zip
+    - name: Unzip Terraform binary
+      unarchive:
+        src: /tmp/terraform.zip
+        dest: /usr/local/bin/
+        remote_src: yes
+    - name: Ensure Terraform binary is executable
+      file:
+        path: /usr/local/bin/terraform
+- name: Ensure the repository is cloned
+      git:
+        repo: https://github.com/rakesh300pt/Rakesh_Terraform.git
+        dest: /home/azureuser/
+        version: main
+        update: yes
+  - name: Ensure Terraform is initialized
+      command: terraform init
+      args:
+        chdir: /home/azureuser
+      register: init_output
+    - name: Display Terraform init output
+      debug:
+        msg: /home/azureuser/demo
+    - name: Apply Terraform scripts (auto-approve)
+      command: terraform apply -auto-approve
+      args:
+        chdir: /home/azureuser/demo
+      register: apply_output
+    - name: Display Terraform apply output
+      debug:
+        msg: "{{ apply_output.stdout }}"
+    - name: Capture the output to a file (optional)
+      copy:
+        content: "{{ apply_output.stdout }}"
+        dest: /tmp/terraform_apply_output.txt
+- name: Remove cloned repositories
+      file:
+        path: /path/to/cloned/repo  # Replace with the path of the cloned repository
+        state: absent
+      when: ansible_facts['os_family'] == 'Debian' or ansible_facts['os_family'] == 'RedHat'
+
+    - name: Remove specific created files
+      file:
+        path: /path/to/created/file.txt  # Replace with the path of the file you want to delete
+        state: absent
+      when: ansible_facts['os_family'] == 'Debian' or ansible_facts['os_family'] == 'RedHat'
+
+    - name: Remove directories matching a pattern
+      find:
+        paths: /path/to/parent_directory  # Replace with parent directory path
+        patterns: '*pattern*'  # Replace with appropriate wildcard or pattern for matching files/directories
+        recurse: yes
+      register: items_to_remove
+
+    - name: Remove matched items
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ items_to_remove.files }}"
+
+  - name: Remove cloned Git repository directory
+      file:
+        path: /path/to/cloned/repo  # Replace with the path of the cloned repository
+        state: absent
+      when: ansible_facts['os_family'] in ['Debian', 'RedHat']
+
+    - name: Remove additional cloned directories or files (optional)
+      file:
+        path: /path/to/another/cloned/directory  # Replace with another path to be cleaned
+        state: absent
+      when: ansible_facts['os_family'] in ['Debian', 'RedHat']
+
